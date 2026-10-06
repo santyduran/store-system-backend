@@ -70,6 +70,14 @@ export class Product {
   minStock: number;
 
   @Prop({
+    required: true,
+    min: 0,
+    max: 100,
+    default: 0,
+  })
+  taxRate: number;
+
+  @Prop({
     type: Types.ObjectId,
     ref: 'Category',
     required: true,

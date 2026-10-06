@@ -7,7 +7,10 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+
+import {
+  Type,
+} from 'class-transformer';
 
 class CreateSaleItemDto {
   @IsString()
@@ -20,15 +23,28 @@ class CreateSaleItemDto {
 
 export class CreateSaleDto {
   @IsArray()
-  @ValidateNested({ each: true })
+  @ValidateNested({
+    each: true,
+  })
   @Type(() => CreateSaleItemDto)
   items: CreateSaleItemDto[];
+
+  @IsOptional()
+  @IsString()
+  customerId?: string;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   discount?: number;
 
-  @IsEnum(['CASH', 'CARD', 'TRANSFER'])
-  paymentMethod: 'CASH' | 'CARD' | 'TRANSFER';
+  @IsEnum([
+    'CASH',
+    'CARD',
+    'TRANSFER',
+  ])
+  paymentMethod:
+    | 'CASH'
+    | 'CARD'
+    | 'TRANSFER';
 }

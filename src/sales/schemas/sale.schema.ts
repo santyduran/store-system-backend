@@ -31,6 +31,12 @@ export class Sale {
   userId: Types.ObjectId;
 
   @Prop({
+    type: Types.ObjectId,
+    ref: 'Customer',
+  })
+  customerId?: Types.ObjectId;
+
+  @Prop({
     required: true,
     min: 0,
   })
@@ -42,6 +48,13 @@ export class Sale {
     default: 0,
   })
   discount: number;
+
+  @Prop({
+    required: true,
+    min: 0,
+    default: 0,
+  })
+  tax: number;
 
   @Prop({
     required: true,

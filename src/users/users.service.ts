@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import {
 
 import {
   Model,
+  Types,
 } from 'mongoose';
 
 import * as bcrypt from 'bcryptjs';
@@ -45,6 +47,22 @@ export class UsersService {
   async create(
     createUserDto: CreateUserDto,
   ): Promise<UserDocument> {
+    const normalizedEmail =
+      createUserDto.email.toLowerCase().trim();
+
+    const existingUser =
+      await this.userModel
+        .findOne({
+          email: normalizedEmail,
+        })
+        .exec();
+
+    if (existingUser) {
+      throw new ConflictException(
+        'El correo electrónico ya está registrado.',
+      );
+    }
+
     const hashedPassword =
       await bcrypt.hash(
         createUserDto.password,
@@ -53,6 +71,7 @@ export class UsersService {
 
     return this.userModel.create({
       ...createUserDto,
+      email: normalizedEmail,
       password: hashedPassword,
     });
   }
@@ -66,17 +85,38 @@ export class UsersService {
 
   async findOne(
     id: string,
-  ): Promise<UserDocument | null> {
-    return this.userModel
-      .findById(id)
-      .select('-password')
-      .exec();
+  ): Promise<UserDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(
+        'Usuario no encontrado',
+      );
+    }
+
+    const user =
+      await this.userModel
+        .findById(id)
+        .select('-password')
+        .exec();
+
+    if (!user) {
+      throw new NotFoundException(
+        'Usuario no encontrado',
+      );
+    }
+
+    return user;
   }
 
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(
+        'Usuario no encontrado',
+      );
+    }
+
     const user =
       await this.userModel
         .findById(id)
@@ -90,12 +130,33 @@ export class UsersService {
 
     if (updateUserDto.name !== undefined) {
       user.name =
-        updateUserDto.name;
+        updateUserDto.name.trim();
     }
 
     if (updateUserDto.email !== undefined) {
+      const normalizedEmail =
+        updateUserDto.email
+          .toLowerCase()
+          .trim();
+
+      const existingUser =
+        await this.userModel
+          .findOne({
+            email: normalizedEmail,
+            _id: {
+              $ne: user._id,
+            },
+          })
+          .exec();
+
+      if (existingUser) {
+        throw new ConflictException(
+          'El correo electrónico ya está registrado.',
+        );
+      }
+
       user.email =
-        updateUserDto.email.toLowerCase();
+        normalizedEmail;
     }
 
     if (updateUserDto.role !== undefined) {
@@ -124,6 +185,12 @@ export class UsersService {
     id: string,
     updateUserStatusDto: UpdateUserStatusDto,
   ): Promise<UserDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(
+        'Usuario no encontrado',
+      );
+    }
+
     const user =
       await this.userModel
         .findById(id)
@@ -160,6 +227,12 @@ export class UsersService {
     updateUserPasswordDto:
       UpdateUserPasswordDto,
   ): Promise<UserDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(
+        'Usuario no encontrado',
+      );
+    }
+
     const user =
       await this.userModel
         .findById(id)

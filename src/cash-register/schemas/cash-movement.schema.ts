@@ -36,16 +36,15 @@ export class CashMovement {
       'OPENING',
       'SALE',
       'SALE_CANCELLATION',
+      'CASH_ENTRY',
+      'CASH_EXIT',
     ],
   })
   type: string;
 
   @Prop({
     required: true,
-    enum: [
-      'IN',
-      'OUT',
-    ],
+    enum: ['IN', 'OUT'],
   })
   movementType: string;
 
@@ -68,6 +67,4 @@ export class CashMovement {
 }
 
 export const CashMovementSchema =
-  SchemaFactory.createForClass(
-    CashMovement,
-  );
+  SchemaFactory.createForClass(CashMovement);

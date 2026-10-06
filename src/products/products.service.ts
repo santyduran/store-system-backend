@@ -41,7 +41,7 @@ export class ProductsService {
 
     if (!Types.ObjectId.isValid(categoryId)) {
       throw new BadRequestException(
-        'El ID de la categorÃ­a no es vÃ¡lido.',
+        'El ID de la categoría no es válido.',
       );
     }
 
@@ -52,19 +52,20 @@ export class ProductsService {
 
     if (!category) {
       throw new NotFoundException(
-        'La categorÃ­a no existe.',
+        'La categoría no existe.',
       );
     }
 
     try {
       return await this.productModel.create({
         ...productData,
-        category: new Types.ObjectId(categoryId),
+        category:
+          new Types.ObjectId(categoryId),
       });
     } catch (error: any) {
       if (error?.code === 11000) {
         throw new ConflictException(
-          'Ya existe un producto con ese SKU o cÃ³digo de barras.',
+          'Ya existe un producto con ese SKU o código de barras.',
         );
       }
 
@@ -76,6 +77,9 @@ export class ProductsService {
     return this.productModel
       .find()
       .populate('category')
+      .sort({
+        createdAt: -1,
+      })
       .exec();
   }
 
@@ -91,6 +95,7 @@ export class ProductsService {
 
     return this.productModel
       .find({
+        status: 'ACTIVE',
         $or: [
           {
             barcode: searchTerm,
@@ -112,17 +117,38 @@ export class ProductsService {
 
   async findOne(
     id: string,
-  ): Promise<ProductDocument | null> {
-    return this.productModel
-      .findById(id)
-      .populate('category')
-      .exec();
+  ): Promise<ProductDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID del producto no es válido.',
+      );
+    }
+
+    const product =
+      await this.productModel
+        .findById(id)
+        .populate('category')
+        .exec();
+
+    if (!product) {
+      throw new NotFoundException(
+        'Producto no encontrado.',
+      );
+    }
+
+    return product;
   }
 
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<ProductDocument | null> {
+  ): Promise<ProductDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID del producto no es válido.',
+      );
+    }
+
     const {
       categoryId,
       ...productData
@@ -135,7 +161,7 @@ export class ProductsService {
     if (categoryId !== undefined) {
       if (!Types.ObjectId.isValid(categoryId)) {
         throw new BadRequestException(
-          'El ID de la categorÃ­a no es vÃ¡lido.',
+          'El ID de la categoría no es válido.',
         );
       }
 
@@ -146,7 +172,7 @@ export class ProductsService {
 
       if (!category) {
         throw new NotFoundException(
-          'La categorÃ­a no existe.',
+          'La categoría no existe.',
         );
       }
 
@@ -155,21 +181,32 @@ export class ProductsService {
     }
 
     try {
-      return await this.productModel
-        .findByIdAndUpdate(
-          id,
-          updateData,
-          {
-            new: true,
-            runValidators: true,
-          },
-        )
-        .populate('category')
-        .exec();
+      const updatedProduct =
+        await this.productModel
+          .findByIdAndUpdate(
+            id,
+            {
+              $set: updateData,
+            },
+            {
+              new: true,
+              runValidators: true,
+            },
+          )
+          .populate('category')
+          .exec();
+
+      if (!updatedProduct) {
+        throw new NotFoundException(
+          'Producto no encontrado.',
+        );
+      }
+
+      return updatedProduct;
     } catch (error: any) {
       if (error?.code === 11000) {
         throw new ConflictException(
-          'Ya existe un producto con ese SKU o cÃ³digo de barras.',
+          'Ya existe un producto con ese SKU o código de barras.',
         );
       }
 
@@ -179,9 +216,26 @@ export class ProductsService {
 
   async remove(
     id: string,
-  ): Promise<ProductDocument | null> {
-    return this.productModel
-      .findByIdAndDelete(id)
-      .exec();
+  ): Promise<ProductDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID del producto no es válido.',
+      );
+    }
+
+    const product =
+      await this.productModel
+        .findById(id)
+        .exec();
+
+    if (!product) {
+      throw new NotFoundException(
+        'Producto no encontrado.',
+      );
+    }
+
+    product.status = 'INACTIVE';
+
+    return product.save();
   }
 }

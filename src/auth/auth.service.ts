@@ -48,22 +48,25 @@ export class AuthService {
     email: string,
     password: string,
   ) {
+    const normalizedEmail =
+      email.toLowerCase().trim();
+
     const user =
       await this.userModel
         .findOne({
-          email: email.toLowerCase(),
+          email: normalizedEmail,
         })
         .exec();
 
     if (!user) {
       throw new UnauthorizedException(
-        'Credenciales inválidas',
+        'Credenciales invÃ¡lidas',
       );
     }
 
     if (user.status === 'INACTIVE') {
       throw new UnauthorizedException(
-        'El usuario está inactivo. Contacta al administrador.',
+        'El usuario estÃ¡ inactivo. Contacta al administrador.',
       );
     }
 
@@ -75,7 +78,7 @@ export class AuthService {
 
     if (!passwordIsValid) {
       throw new UnauthorizedException(
-        'Credenciales inválidas',
+        'Credenciales invÃ¡lidas',
       );
     }
 
@@ -118,7 +121,7 @@ export class AuthService {
     if (!user) {
       return {
         message:
-          'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
+          'Si el correo estÃ¡ registrado, recibirÃ¡s instrucciones para restablecer tu contraseÃ±a.',
       };
     }
 
@@ -152,7 +155,7 @@ export class AuthService {
 
     return {
       message:
-        'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
+        'Si el correo estÃ¡ registrado, recibirÃ¡s instrucciones para restablecer tu contraseÃ±a.',
     };
   }
 
@@ -172,7 +175,7 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException(
-        'El enlace de recuperación no es válido o ha expirado.',
+        'El enlace de recuperaciÃ³n no es vÃ¡lido o ha expirado.',
       );
     }
 
@@ -195,7 +198,7 @@ export class AuthService {
 
     return {
       message:
-        'Contraseña restablecida correctamente.',
+        'ContraseÃ±a restablecida correctamente.',
     };
   }
 }

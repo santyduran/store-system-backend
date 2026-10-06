@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import {
   Category,
@@ -17,7 +19,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto.js';
 export class CategoriesService {
   constructor(
     @InjectModel(Category.name)
-    private readonly categoryModel: Model<CategoryDocument>,
+    private readonly categoryModel:
+      Model<CategoryDocument>,
   ) {}
 
   async create(categoryData: {
@@ -40,33 +43,74 @@ export class CategoriesService {
   }
 
   async findAll(): Promise<CategoryDocument[]> {
-    return this.categoryModel.find().exec();
+    return this.categoryModel
+      .find()
+      .sort({
+        createdAt: -1,
+      })
+      .exec();
   }
 
   async findOne(
     id: string,
-  ): Promise<CategoryDocument | null> {
-    return this.categoryModel
-      .findById(id)
-      .exec();
+  ): Promise<CategoryDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID de la categoría no es válido.',
+      );
+    }
+
+    const category =
+      await this.categoryModel
+        .findById(id)
+        .exec();
+
+    if (!category) {
+      throw new NotFoundException(
+        'Categoría no encontrada.',
+      );
+    }
+
+    return category;
   }
 
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
-  ): Promise<CategoryDocument | null> {
+  ): Promise<CategoryDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID de la categoría no es válido.',
+      );
+    }
+
     try {
-      return await this.categoryModel
-        .findByIdAndUpdate(
-          id,
-          updateCategoryDto,
-          {
-            new: true,
-            runValidators: true,
-          },
-        )
-        .exec();
+      const updatedCategory =
+        await this.categoryModel
+          .findByIdAndUpdate(
+            id,
+            {
+              $set: updateCategoryDto,
+            },
+            {
+              new: true,
+              runValidators: true,
+            },
+          )
+          .exec();
+
+      if (!updatedCategory) {
+        throw new NotFoundException(
+          'Categoría no encontrada.',
+        );
+      }
+
+      return updatedCategory;
     } catch (error: any) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       if (error?.code === 11000) {
         throw new ConflictException(
           'Ya existe una categoría con ese nombre.',
@@ -79,9 +123,26 @@ export class CategoriesService {
 
   async remove(
     id: string,
-  ): Promise<CategoryDocument | null> {
-    return this.categoryModel
-      .findByIdAndDelete(id)
-      .exec();
+  ): Promise<CategoryDocument> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(
+        'El ID de la categoría no es válido.',
+      );
+    }
+
+    const category =
+      await this.categoryModel
+        .findById(id)
+        .exec();
+
+    if (!category) {
+      throw new NotFoundException(
+        'Categoría no encontrada.',
+      );
+    }
+
+    category.status = 'INACTIVE';
+
+    return category.save();
   }
 }

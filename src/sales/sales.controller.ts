@@ -15,6 +15,18 @@ import { SalesService } from './sales.service.js';
 
 import { CreateSaleDto } from './dto/create-sale.dto.js';
 
+import {
+  CreatePendingSaleDto,
+} from './dto/create-pending-sale.dto.js';
+
+import {
+  UpdatePendingSaleDto,
+} from './dto/update-pending-sale.dto.js';
+
+import {
+  CompletePendingSaleDto,
+} from './dto/complete-pending-sale.dto.js';
+
 import { CancelSaleDto } from './dto/cancel-sale.dto.js';
 
 import {
@@ -58,6 +70,118 @@ export class SalesController {
     );
   }
 
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN', 'CASHIER')
+  @Post('pending')
+  createPendingSale(
+    @Body()
+    createPendingSaleDto:
+      CreatePendingSaleDto,
+    @Req() request: Request,
+  ) {
+    const user =
+      request.user as {
+        userId: string;
+      };
+
+    return this.salesService.createPendingSale(
+      createPendingSaleDto,
+      user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pending')
+  findPendingSales(
+    @Req() request: Request,
+  ) {
+    const user =
+      request.user as {
+        userId: string;
+      };
+
+    return this.salesService.findPendingSales(
+      user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pending/:id')
+  findPendingSale(
+    @Param('id') id: string,
+  ) {
+    return this.salesService.findPendingSale(
+      id,
+    );
+  }
+
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN', 'CASHIER')
+  @Patch('pending/:id')
+  updatePendingSale(
+    @Param('id') id: string,
+    @Body()
+    updatePendingSaleDto:
+      UpdatePendingSaleDto,
+    @Req() request: Request,
+  ) {
+    const user =
+      request.user as {
+        userId: string;
+      };
+
+    return this.salesService.updatePendingSale(
+      id,
+      updatePendingSaleDto,
+      user.userId,
+    );
+  }
+
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN', 'CASHIER')
+  @Post('pending/:id/complete')
+  completePendingSale(
+    @Param('id') id: string,
+    @Body()
+    completePendingSaleDto:
+      CompletePendingSaleDto,
+    @Req() request: Request,
+  ) {
+    const user =
+      request.user as {
+        userId: string;
+      };
+
+    return this.salesService.completePendingSale(
+      id,
+      completePendingSaleDto,
+      user.userId,
+    );
+  }
+
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN', 'CASHIER')
+  @Patch('pending/:id/cancel')
+  cancelPendingSale(
+    @Param('id') id: string,
+  ) {
+    return this.salesService.cancelPendingSale(
+      id,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
@@ -76,7 +200,7 @@ export class SalesController {
     JwtAuthGuard,
     RolesGuard,
   )
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CASHIER')
   @Patch(':id/cancel')
   cancel(
     @Param('id') id: string,

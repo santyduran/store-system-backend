@@ -5,6 +5,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Max,
   Min,
 } from 'class-validator';
 
@@ -54,6 +55,12 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   minStock: number;
+
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(100)
+  taxRate: number;
 
   @IsOptional()
   @IsObject()

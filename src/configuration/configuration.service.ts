@@ -37,6 +37,8 @@ export class ConfigurationService {
       configuration =
         await this.configurationModel.create({
           storeName: 'Store System',
+          invoicePrefix: 'FV',
+          invoiceCurrentNumber: 0,
         });
     }
 
@@ -55,14 +57,47 @@ export class ConfigurationService {
       configuration =
         await this.configurationModel.create({
           storeName: 'Store System',
+          invoicePrefix: 'FV',
+          invoiceCurrentNumber: 0,
         });
     }
 
-    Object.assign(
-      configuration,
-      updateConfigurationDto,
-    );
+    const updateData = {
+      ...updateConfigurationDto,
+      storeName:
+        updateConfigurationDto.storeName ??
+        configuration.storeName ??
+        'Store System',
+      invoicePrefix:
+        updateConfigurationDto.invoicePrefix ??
+        configuration.invoicePrefix ??
+        'FV',
+      invoiceCurrentNumber:
+        updateConfigurationDto.invoiceCurrentNumber ??
+        configuration.invoiceCurrentNumber ??
+        0,
+    };
 
-    return configuration.save();
+    return this.configurationModel
+      .findByIdAndUpdate(
+        configuration._id,
+        {
+          $set: updateData,
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      )
+      .exec()
+      .then((updatedConfiguration) => {
+        if (!updatedConfiguration) {
+          throw new Error(
+            'No se pudo actualizar la configuración.',
+          );
+        }
+
+        return updatedConfiguration;
+      });
   }
 }

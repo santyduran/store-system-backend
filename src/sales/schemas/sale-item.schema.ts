@@ -38,6 +38,21 @@ export class SaleItem {
     min: 0,
   })
   subtotal: number;
+
+  @Prop({
+    required: true,
+    min: 0,
+    max: 100,
+    default: 0,
+  })
+  taxRate: number;
+
+  @Prop({
+    required: true,
+    min: 0,
+    default: 0,
+  })
+  taxAmount: number;
 }
 
 export const SaleItemSchema =

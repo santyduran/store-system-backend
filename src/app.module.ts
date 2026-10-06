@@ -13,7 +13,13 @@ import { SalesModule } from './sales/sales.module.js';
 import { CashRegisterModule } from './cash-register/cash-register.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { ConfigurationModule } from './configuration/configuration.module.js';
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { CustomersModule } from './customers/customers.module.js';
+import { InvoicingModule } from './invoicing/invoicing.module.js';
+import { CreditNotesModule } from './credit-notes/credit-notes.module.js';
+import { DebitNotesModule } from './debit-notes/debit-notes.module.js';
+
+export const { ObserveModule, ObserveInstrument } =
+  createObserveModule();
 
 @Module({
   imports: [
@@ -46,8 +52,20 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ReportsModule,
 
     ConfigurationModule,
+
+    CustomersModule,
+
+    InvoicingModule,
+
+    CreditNotesModule,
+
+    DebitNotesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [
+    AppController,
+  ],
+  providers: [
+    AppService,
+  ],
 })
 export class AppModule {}

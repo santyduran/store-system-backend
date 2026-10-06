@@ -1,5 +1,13 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import {
+  Prop,
+  Schema,
+  SchemaFactory,
+} from '@nestjs/mongoose';
+
+import {
+  HydratedDocument,
+  Types,
+} from 'mongoose';
 
 export type CashRegisterDocument =
   HydratedDocument<CashRegister>;
@@ -47,11 +55,16 @@ export class CashRegister {
 
   @Prop({
     required: true,
-    enum: ['OPEN', 'CLOSED'],
+    enum: [
+      'OPEN',
+      'CLOSED',
+    ],
     default: 'OPEN',
   })
   status: string;
 }
 
 export const CashRegisterSchema =
-  SchemaFactory.createForClass(CashRegister);
+  SchemaFactory.createForClass(
+    CashRegister,
+  );

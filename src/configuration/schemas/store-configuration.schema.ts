@@ -3,7 +3,10 @@ import {
   Schema,
   SchemaFactory,
 } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+
+import {
+  HydratedDocument,
+} from 'mongoose';
 
 export type StoreConfigurationDocument =
   HydratedDocument<StoreConfiguration>;
@@ -18,6 +21,21 @@ export class StoreConfiguration {
     default: 'Store System',
   })
   storeName: string;
+
+  @Prop({
+    trim: true,
+  })
+  legalName?: string;
+
+  @Prop({
+    trim: true,
+  })
+  nit?: string;
+
+  @Prop({
+    trim: true,
+  })
+  dv?: string;
 
   @Prop({
     trim: true,
@@ -37,7 +55,22 @@ export class StoreConfiguration {
   @Prop({
     trim: true,
   })
+  city?: string;
+
+  @Prop({
+    trim: true,
+  })
+  department?: string;
+
+  @Prop({
+    trim: true,
+  })
   email?: string;
+
+  @Prop({
+    trim: true,
+  })
+  economicActivity?: string;
 
   @Prop({
     trim: true,
@@ -58,6 +91,52 @@ export class StoreConfiguration {
     trim: true,
   })
   receiptMessage?: string;
+
+  @Prop({
+    required: true,
+    trim: true,
+    default: 'FV',
+  })
+  invoicePrefix: string;
+
+  @Prop({
+    required: true,
+    min: 0,
+    default: 0,
+  })
+  invoiceCurrentNumber: number;
+
+  /**
+   * Número de autorización de numeración
+   * asignado posteriormente por la DIAN.
+   */
+  @Prop({
+    trim: true,
+  })
+  authorizationNumber?: string;
+
+  /**
+   * Fecha de autorización de numeración
+   * asignada posteriormente por la DIAN.
+   */
+  @Prop()
+  authorizationDate?: Date;
+
+  /**
+   * Primer número autorizado para el prefijo.
+   */
+  @Prop({
+    min: 0,
+  })
+  authorizationRangeFrom?: number;
+
+  /**
+   * Último número autorizado para el prefijo.
+   */
+  @Prop({
+    min: 0,
+  })
+  authorizationRangeTo?: number;
 }
 
 export const StoreConfigurationSchema =

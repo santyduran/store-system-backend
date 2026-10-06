@@ -71,6 +71,11 @@ export class ReportsService {
       0,
     );
 
+    const taxAmount = sales.reduce(
+      (total, sale) => total + sale.tax,
+      0,
+    );
+
     const discountAmount = sales.reduce(
       (total, sale) => total + sale.discount,
       0,
@@ -116,6 +121,7 @@ export class ReportsService {
     return {
       totalSales,
       subtotalAmount,
+      taxAmount,
       discountAmount,
       totalAmount,
       averageSale,
@@ -246,17 +252,20 @@ export class ReportsService {
       const existing =
         productsMap.get(productId);
 
+      const itemTotal =
+        item.subtotal + item.taxAmount;
+
       if (existing) {
         existing.quantitySold +=
           item.quantity;
 
         existing.totalAmount +=
-          item.subtotal;
+          itemTotal;
       } else {
         productsMap.set(productId, {
           productId,
           quantitySold: item.quantity,
-          totalAmount: item.subtotal,
+          totalAmount: itemTotal,
         });
       }
     }
