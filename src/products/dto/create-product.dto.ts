@@ -1,14 +1,4 @@
-import {
-  IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
-
+import { IsMongoId, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductDto {
@@ -31,6 +21,10 @@ export class CreateProductDto {
   @IsMongoId()
   @IsNotEmpty()
   categoryId: string;
+
+  @IsOptional()
+  @IsMongoId()
+  providerId?: string;
 
   @IsOptional()
   @IsString()

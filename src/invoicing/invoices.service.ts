@@ -501,7 +501,156 @@ export class InvoicesService {
       });
     }
 
+    const qrCustomer = invoiceCustomerId
+      ? await this.customerModel
+          .findById(invoiceCustomerId)
+          .exec()
+      : null;
+
+    invoice.qrCode = this.buildMockQrPayload(
+      {
+        ...invoice.toObject(),
+        customerId: qrCustomer?.toObject() ?? null,
+      },
+      invoiceItemsData,
+    );
+
+    await invoice.save();
+
     return invoice;
+  }
+
+  private buildMockQrPayload(
+    invoiceData: Record<string, any>,
+    items: Array<Record<string, any>>,
+  ): string {
+    const customer =
+      invoiceData.customerId &&
+      typeof invoiceData.customerId === 'object'
+        ? invoiceData.customerId
+        : null;
+
+    const issuer = invoiceData.issuer ?? {};
+
+    return JSON.stringify({
+      tipo: 'FACTURA_ELECTRONICA_SIMULADA',
+      ambiente: 'PRUEBAS',
+      validacionDIAN: false,
+      mensaje:
+        'Documento de prueba. No constituye una factura validada por la DIAN.',
+
+      numeroFactura:
+        invoiceData.invoiceNumber,
+
+      fechaEmision:
+        invoiceData.issueDate,
+
+      emisor: {
+        razonSocial:
+          issuer.legalName ?? issuer.storeName ?? null,
+
+        nombreComercial:
+          issuer.storeName ?? null,
+
+        nit:
+          issuer.nit ?? null,
+
+        dv:
+          issuer.dv ?? null,
+
+        direccion:
+          issuer.address ?? null,
+
+        ciudad:
+          issuer.city ?? null,
+
+        departamento:
+          issuer.department ?? null,
+
+        telefono:
+          issuer.phone ?? null,
+
+        correo:
+          issuer.email ?? null,
+      },
+
+      cliente: customer
+        ? {
+            tipoDocumento:
+              customer.documentType ?? null,
+
+            numeroDocumento:
+              customer.documentNumber ?? null,
+
+            nombre: [
+              customer.firstName,
+              customer.lastName,
+            ]
+              .filter(Boolean)
+              .join(' '),
+
+            correo:
+              customer.email ?? null,
+          }
+        : null,
+
+      autorizacion: {
+        numero:
+          invoiceData.authorizationNumber ?? null,
+
+        fecha:
+          invoiceData.authorizationDate ?? null,
+
+        rangoDesde:
+          invoiceData.authorizationRangeFrom ?? null,
+
+        rangoHasta:
+          invoiceData.authorizationRangeTo ?? null,
+      },
+
+      conceptos: items.map((item) => ({
+        producto:
+          item.productName ?? null,
+
+        cantidad:
+          item.quantity ?? 0,
+
+        valorUnitario:
+          item.unitPrice ?? 0,
+
+        subtotal:
+          item.subtotal ?? 0,
+
+        tarifaImpuesto:
+          item.taxRate ?? 0,
+
+        impuesto:
+          item.taxAmount ?? 0,
+
+        total:
+          item.total ?? 0,
+      })),
+
+      subtotal:
+        invoiceData.subtotal ?? 0,
+
+      descuento:
+        invoiceData.discount ?? 0,
+
+      impuestos:
+        invoiceData.taxTotal ?? 0,
+
+      total:
+        invoiceData.total ?? 0,
+
+      moneda: 'COP',
+
+      formaPago:
+        invoiceData.paymentMethod ?? null,
+
+      estado:
+        invoiceData.status ?? 'GENERATED',
+    });
   }
 
   async findAll(): Promise<InvoiceDocument[]> {
@@ -562,6 +711,18 @@ export class InvoicesService {
           createdAt: 1,
         })
         .exec();
+
+    if (!invoice.qrCode?.trim()) {
+      invoice.qrCode = this.buildMockQrPayload(
+        invoice.toObject() as Record<string, any>,
+        items.map(
+          (item) =>
+            item.toObject() as Record<string, any>,
+        ),
+      );
+
+      await invoice.save();
+    }
 
     return {
       ...invoice.toObject(),

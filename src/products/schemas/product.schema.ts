@@ -3,78 +3,39 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type ProductDocument = HydratedDocument<Product>;
 
-@Schema({
-  timestamps: true,
-  collection: 'Products',
-})
+@Schema({ timestamps: true, collection: 'Products' })
 export class Product {
-  @Prop({
-    required: true,
-    trim: true,
-  })
+  @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop({
-    trim: true,
-  })
+  @Prop({ trim: true })
   description?: string;
 
-  @Prop({
-    trim: true,
-    unique: true,
-    sparse: true,
-  })
+  @Prop({ trim: true, unique: true, sparse: true })
   sku?: string;
 
-  @Prop({
-    trim: true,
-    unique: true,
-    sparse: true,
-  })
+  @Prop({ trim: true, unique: true, sparse: true })
   barcode?: string;
 
-  @Prop({
-    trim: true,
-  })
+  @Prop({ trim: true })
   brand?: string;
 
-  @Prop({
-    type: Object,
-  })
+  @Prop({ type: Object })
   attributes?: Record<string, unknown>;
 
-  @Prop({
-    required: true,
-    min: 0,
-  })
+  @Prop({ required: true, min: 0 })
   purchasePrice: number;
 
-  @Prop({
-    required: true,
-    min: 0,
-  })
+  @Prop({ required: true, min: 0 })
   salePrice: number;
 
-  @Prop({
-    required: true,
-    min: 0,
-    default: 0,
-  })
+  @Prop({ required: true, min: 0, default: 0 })
   stock: number;
 
-  @Prop({
-    required: true,
-    min: 0,
-    default: 0,
-  })
+  @Prop({ required: true, min: 0, default: 0 })
   minStock: number;
 
-  @Prop({
-    required: true,
-    min: 0,
-    max: 100,
-    default: 0,
-  })
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
   taxRate: number;
 
   @Prop({
@@ -85,6 +46,14 @@ export class Product {
   category: Types.ObjectId;
 
   @Prop({
+    type: Types.ObjectId,
+    ref: 'Provider',
+    required: false,
+    default: null,
+  })
+  provider?: Types.ObjectId | null;
+
+  @Prop({
     required: true,
     enum: ['ACTIVE', 'INACTIVE'],
     default: 'ACTIVE',
@@ -92,5 +61,4 @@ export class Product {
   status: string;
 }
 
-export const ProductSchema =
-  SchemaFactory.createForClass(Product);
+export const ProductSchema = SchemaFactory.createForClass(Product);

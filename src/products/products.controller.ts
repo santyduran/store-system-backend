@@ -27,8 +27,8 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  create(@Body() dto: CreateProductDto) {
+    return this.productsService.create(dto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,6 +44,14 @@ export class ProductsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('by-provider/:providerId')
+  findByProvider(
+    @Param('providerId') providerId: string,
+  ) {
+    return this.productsService.findByProvider(providerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
@@ -54,12 +62,9 @@ export class ProductsController {
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
+    @Body() dto: UpdateProductDto,
   ) {
-    return this.productsService.update(
-      id,
-      updateProductDto,
-    );
+    return this.productsService.update(id, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

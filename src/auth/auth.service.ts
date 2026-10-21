@@ -1,3 +1,4 @@
+
 import {
   Injectable,
   UnauthorizedException,
@@ -60,13 +61,13 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException(
-        'Credenciales invÃ¡lidas',
+        'Credenciales inválidas',
       );
     }
 
     if (user.status === 'INACTIVE') {
       throw new UnauthorizedException(
-        'El usuario estÃ¡ inactivo. Contacta al administrador.',
+        'El usuario está inactivo. Contacta al administrador.',
       );
     }
 
@@ -78,7 +79,7 @@ export class AuthService {
 
     if (!passwordIsValid) {
       throw new UnauthorizedException(
-        'Credenciales invÃ¡lidas',
+        'Credenciales inválidas',
       );
     }
 
@@ -121,7 +122,7 @@ export class AuthService {
     if (!user) {
       return {
         message:
-          'Si el correo estÃ¡ registrado, recibirÃ¡s instrucciones para restablecer tu contraseÃ±a.',
+          'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
       };
     }
 
@@ -155,7 +156,7 @@ export class AuthService {
 
     return {
       message:
-        'Si el correo estÃ¡ registrado, recibirÃ¡s instrucciones para restablecer tu contraseÃ±a.',
+        'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.',
     };
   }
 
@@ -175,7 +176,7 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException(
-        'El enlace de recuperaciÃ³n no es vÃ¡lido o ha expirado.',
+        'El enlace de recuperación no es válido o ha expirado.',
       );
     }
 
@@ -198,7 +199,7 @@ export class AuthService {
 
     return {
       message:
-        'ContraseÃ±a restablecida correctamente.',
+        'Contraseña restablecida correctamente.',
     };
   }
 }

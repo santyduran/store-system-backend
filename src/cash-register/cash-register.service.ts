@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
 } from '@nestjs/common';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -101,6 +102,23 @@ export class CashRegisterService {
     return this.cashRegisterModel
       .findOne()
       .sort({
+        createdAt: -1,
+      })
+      .exec();
+  }
+
+  /**
+   * Obtiene todas las cajas registradas, abiertas y cerradas,
+   * ordenadas desde la más reciente hasta la más antigua.
+   */
+  async getHistory(
+    _userId: string,
+  ): Promise<CashRegisterDocument[]> {
+    return this.cashRegisterModel
+      .find()
+      .populate('userId', 'name email role')
+      .sort({
+        openingDate: -1,
         createdAt: -1,
       })
       .exec();
@@ -433,6 +451,20 @@ export class CashRegisterService {
     const difference =
       countedCash - currentCashRegister.expectedCash;
 
+    const differenceReason =
+      typeof closeCashRegisterDto.differenceReason === 'string'
+        ? closeCashRegisterDto.differenceReason.trim()
+        : '';
+
+    if (
+      Math.abs(difference) > 0.009 &&
+      !differenceReason
+    ) {
+      throw new BadRequestException(
+        'Debes indicar el motivo de la diferencia para cerrar la caja.',
+      );
+    }
+
     const closedCashRegister =
       await this.cashRegisterModel.findOneAndUpdate(
         {
@@ -443,6 +475,9 @@ export class CashRegisterService {
           $set: {
             countedCash,
             difference,
+            ...(differenceReason
+              ? { differenceReason }
+              : { differenceReason: '' }),
             closingDate: new Date(),
             status: 'CLOSED',
           },

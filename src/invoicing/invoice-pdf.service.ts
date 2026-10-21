@@ -790,8 +790,8 @@ export class InvoicePdfService {
     }
 
     if (qrBuffer) {
-      const qrSize = 82;
-      const qrX = 445;
+      const qrSize = 100;
+      const qrX = (612 - qrSize) / 2;
       const qrLabelY =
         electronicY;
       const qrY =
@@ -802,10 +802,10 @@ export class InvoicePdfService {
         .font('Helvetica-Bold')
         .text(
           'Código QR',
-          qrX,
+          40,
           qrLabelY,
           {
-            width: qrSize,
+            width: 532,
             align: 'center',
           },
         );
@@ -821,14 +821,14 @@ export class InvoicePdfService {
       );
 
       doc
-        .fontSize(6)
+        .fontSize(6.5)
         .font('Helvetica')
         .text(
           'Escanee para consultar',
-          qrX - 8,
+          40,
           qrY + qrSize + 13,
           {
-            width: qrSize + 16,
+            width: 532,
             align: 'center',
           },
         );
@@ -839,7 +839,7 @@ export class InvoicePdfService {
         ? electronicY +
           15 +
           10 +
-          82 +
+          100 +
           13 +
           8
         : electronicY;

@@ -1,15 +1,4 @@
-import {
-  IsEnum,
-  IsMongoId,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
-
+import { IsEnum, IsMongoId, IsNumber, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateProductDto {
@@ -36,6 +25,10 @@ export class UpdateProductDto {
   @IsOptional()
   @IsMongoId()
   categoryId?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  providerId?: string | null;
 
   @IsOptional()
   @IsString()

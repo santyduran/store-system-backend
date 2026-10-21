@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -14,6 +15,8 @@ import type {
   Request,
   Response,
 } from 'express';
+
+import QRCode from 'qrcode';
 
 import {
   InvoicesService,
@@ -88,6 +91,41 @@ export class InvoicingController {
       id,
       response,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/qr')
+  async generateQr(
+    @Param('id')
+    id: string,
+
+    @Res()
+    response: Response,
+  ) {
+    const invoice =
+      await this.invoicesService.findOne(id);
+
+    if (!invoice.qrCode) {
+      throw new NotFoundException(
+        'La factura no tiene información de código QR.',
+      );
+    }
+
+    const qrBuffer =
+      await QRCode.toBuffer(
+        invoice.qrCode,
+        {
+          type: 'png',
+          width: 240,
+          margin: 2,
+          errorCorrectionLevel: 'M',
+        },
+      );
+
+    response
+      .type('image/png')
+      .set('Cache-Control', 'no-store')
+      .send(qrBuffer);
   }
 
   @UseGuards(JwtAuthGuard)

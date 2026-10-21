@@ -1,3 +1,4 @@
+
 import {
   Prop,
   Schema,
@@ -52,6 +53,13 @@ export class CashRegister {
 
   @Prop()
   difference?: number;
+
+  @Prop({
+    type: String,
+    maxlength: 500,
+    trim: true,
+  })
+  differenceReason?: string;
 
   @Prop({
     required: true,

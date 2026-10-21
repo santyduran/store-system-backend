@@ -100,6 +100,21 @@ export class CashRegisterController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('history')
+  getHistory(
+    @Req() request: Request,
+  ) {
+    const user =
+      request.user as {
+        userId: string;
+      };
+
+    return this.cashRegisterService.getHistory(
+      user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('movements')
   getMovements(
     @Req() request: Request,

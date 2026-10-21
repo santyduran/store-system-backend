@@ -14,6 +14,11 @@ import {
   CategorySchema,
 } from '../categories/schemas/category.schema.js';
 
+import {
+  Provider,
+  ProviderSchema,
+} from '../providers/schemas/provider.schema.js';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -24,6 +29,10 @@ import {
       {
         name: Category.name,
         schema: CategorySchema,
+      },
+      {
+        name: Provider.name,
+        schema: ProviderSchema,
       },
     ]),
   ],

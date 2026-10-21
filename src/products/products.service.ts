@@ -21,6 +21,10 @@ import {
   CategoryDocument,
 } from '../categories/schemas/category.schema.js';
 
+import {
+  Provider,
+} from '../providers/schemas/provider.schema.js';
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -29,6 +33,9 @@ export class ProductsService {
 
     @InjectModel(Category.name)
     private readonly categoryModel: Model<CategoryDocument>,
+
+    @InjectModel(Provider.name)
+    private readonly providerModel: Model<Provider>,
   ) {}
 
   async create(
@@ -36,6 +43,7 @@ export class ProductsService {
   ): Promise<ProductDocument> {
     const {
       categoryId,
+      providerId,
       ...productData
     } = createProductDto;
 
@@ -56,11 +64,40 @@ export class ProductsService {
       );
     }
 
+    let providerObjectId: Types.ObjectId | null = null;
+
+    if (providerId) {
+      if (!Types.ObjectId.isValid(providerId)) {
+        throw new BadRequestException(
+          'El ID del proveedor no es válido.',
+        );
+      }
+
+      const provider =
+        await this.providerModel
+          .findById(providerId)
+          .exec();
+
+      if (!provider) {
+        throw new NotFoundException(
+          'El proveedor no existe.',
+        );
+      }
+
+      if (provider.status !== 'ACTIVE') {
+        throw new BadRequestException(
+          'No se puede asignar un proveedor inactivo.',
+        );
+      }
+
+      providerObjectId = new Types.ObjectId(providerId);
+    }
+
     try {
       return await this.productModel.create({
         ...productData,
-        category:
-          new Types.ObjectId(categoryId),
+        category: new Types.ObjectId(categoryId),
+        provider: providerObjectId,
       });
     } catch (error: any) {
       if (error?.code === 11000) {
@@ -77,6 +114,39 @@ export class ProductsService {
     return this.productModel
       .find()
       .populate('category')
+      .populate('provider')
+      .sort({
+        createdAt: -1,
+      })
+      .exec();
+  }
+
+  async findByProvider(
+    providerId: string,
+  ): Promise<ProductDocument[]> {
+    if (!Types.ObjectId.isValid(providerId)) {
+      throw new BadRequestException(
+        'El ID del proveedor no es válido.',
+      );
+    }
+
+    const provider =
+      await this.providerModel
+        .findById(providerId)
+        .exec();
+
+    if (!provider) {
+      throw new NotFoundException(
+        'El proveedor no existe.',
+      );
+    }
+
+    return this.productModel
+      .find({
+        provider: new Types.ObjectId(providerId),
+      })
+      .populate('category')
+      .populate('provider')
       .sort({
         createdAt: -1,
       })
@@ -86,8 +156,7 @@ export class ProductsService {
   async search(
     term: string,
   ): Promise<ProductDocument[]> {
-    const searchTerm =
-      term?.trim();
+    const searchTerm = term?.trim();
 
     if (!searchTerm) {
       return [];
@@ -112,6 +181,7 @@ export class ProductsService {
         ],
       })
       .populate('category')
+      .populate('provider')
       .exec();
   }
 
@@ -128,6 +198,7 @@ export class ProductsService {
       await this.productModel
         .findById(id)
         .populate('category')
+        .populate('provider')
         .exec();
 
     if (!product) {
@@ -151,6 +222,7 @@ export class ProductsService {
 
     const {
       categoryId,
+      providerId,
       ...productData
     } = updateProductDto;
 
@@ -176,8 +248,38 @@ export class ProductsService {
         );
       }
 
-      updateData.category =
-        new Types.ObjectId(categoryId);
+      updateData.category = new Types.ObjectId(categoryId);
+    }
+
+    if (providerId !== undefined) {
+      if (providerId === null || providerId === '') {
+        updateData.provider = null;
+      } else {
+        if (!Types.ObjectId.isValid(providerId)) {
+          throw new BadRequestException(
+            'El ID del proveedor no es válido.',
+          );
+        }
+
+        const provider =
+          await this.providerModel
+            .findById(providerId)
+            .exec();
+
+        if (!provider) {
+          throw new NotFoundException(
+            'El proveedor no existe.',
+          );
+        }
+
+        if (provider.status !== 'ACTIVE') {
+          throw new BadRequestException(
+            'No se puede asignar un proveedor inactivo.',
+          );
+        }
+
+        updateData.provider = new Types.ObjectId(providerId);
+      }
     }
 
     try {
@@ -194,6 +296,7 @@ export class ProductsService {
             },
           )
           .populate('category')
+          .populate('provider')
           .exec();
 
       if (!updatedProduct) {

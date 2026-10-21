@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
@@ -17,6 +18,8 @@ import { CustomersModule } from './customers/customers.module.js';
 import { InvoicingModule } from './invoicing/invoicing.module.js';
 import { CreditNotesModule } from './credit-notes/credit-notes.module.js';
 import { DebitNotesModule } from './debit-notes/debit-notes.module.js';
+import { ProvidersModule } from './providers/providers.module.js';
+import { SupplierInvoicesModule } from './supplier-invoices/supplier-invoices.module.js';
 
 export const { ObserveModule, ObserveInstrument } =
   createObserveModule();
@@ -60,6 +63,10 @@ export const { ObserveModule, ObserveInstrument } =
     CreditNotesModule,
 
     DebitNotesModule,
+
+    ProvidersModule,
+
+    SupplierInvoicesModule,
   ],
   controllers: [
     AppController,
